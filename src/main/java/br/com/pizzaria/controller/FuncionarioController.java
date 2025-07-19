@@ -1,0 +1,74 @@
+package br.com.pizzaria.controller;
+
+import br.com.pizzaria.model.Pedido;
+import br.com.pizzaria.service.PedidoService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.data.domain.Pageable;
+
+
+
+@Controller
+@RequestMapping("/funcionario")
+public class FuncionarioController {
+
+    @Autowired
+    private PedidoService pedidoService;
+
+
+   // @GetMapping("/dashboard")
+   // public String verDashboard(Model model) {
+        // Busca todos os pedidos com status "RECEBIDO"
+        //model.addAttribute("pedidosRecebidos", pedidoService.buscarPedidosRecebidos());
+        //return "funcionario/dashboard"; // Retorna a nova página que vamos criar
+    //}
+
+    @GetMapping("/dashboard")
+    public String verDashboard(Model model, @RequestParam(name = "page", defaultValue = "0") int page) {
+
+        Pageable pageable = PageRequest.of(page, 6, Sort.by("dataHora").descending());
+
+        // Busca a página de pedidos
+        Page<Pedido> paginaDePedidos = pedidoService.buscarTodosPedidosPaginado(pageable);
+
+        model.addAttribute("paginaDePedidos", paginaDePedidos);
+        return "funcionario/dashboard";
+    }
+
+
+    @PostMapping("/pedidos/preparar")
+    public String prepararPedido(@RequestParam("pedidoId") Long pedidoId, RedirectAttributes redirectAttributes) {
+        try {
+            // Reutilizamos o método que dispara a notificação do Observer!
+            pedidoService.atualizarStatus(pedidoId, "PRONTO PARA ENTREGA");
+            redirectAttributes.addFlashAttribute("mensagemSucesso", "Status do pedido #" + pedidoId + " atualizado para PRONTO PARA ENTREGA.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("mensagemErro", "Erro ao atualizar o status do pedido.");
+        }
+        return "redirect:/funcionario/dashboard";
+    }
+
+
+    @GetMapping("/historico")
+    public String verHistorico(Model model, @RequestParam(name = "page", defaultValue = "0") int page) {
+
+
+        Pageable pageable = PageRequest.of(page, 5, Sort.by("dataHora").descending());
+
+
+        Page<Pedido> paginaDePedidos = pedidoService.buscarHistoricoDeTodosPedidos(pageable);
+
+        model.addAttribute("paginaDePedidos", paginaDePedidos);
+
+        return "funcionario/historico";
+    }
+}
