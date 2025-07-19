@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="form-novo-endereco" id="form-novo-endereco">
+    <hr>
+    <h6 class="small text-muted mb-3">NOVO ENDEREÇO</h6>
+
+    <div class="mb-2">
+        <input type="text" class="form-control form-control-sm" name="rua" placeholder="Rua / Avenida" required>
+    </div>
+    <div class="mb-2">
+        <input type="text" class="form-control form-control-sm" name="numero" placeholder="Número" required>
+    </div>
+    <div class="mb-2">
+        <input type="text" class="form-control form-control-sm" name="bairro" placeholder="Bairro" required>
+    </div>
+    <div class="mb-2">
+        <input type="text" class="form-control form-control-sm" name="cidade" placeholder="Cidade" required>
+    </div>
+    <div class="mb-2">
+        <input type="text" class="form-control form-control-sm" name="cep" placeholder="CEP" required>
+    </div>
+    <div class="mb-3">
+        <input type="text" class="form-control form-control-sm" name="complemento" placeholder="Complemento (opcional)">
+    </div>
+    <div class="d-grid gap-2">
+        <button type="button" class="btn btn-primary btn-sm" onclick="salvarNovoEndereco()">Salvar Endereço</button>
+        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="irParaCheckout()">Cancelar</button>
+    </div>
+</div>
+
+</body>
+</html>

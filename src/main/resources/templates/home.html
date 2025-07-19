@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Página Inicial - Pizzaria</title>
+</head>
+<body>
+<h1>Bem-vindo à Pizzaria!</h1>
+
+<p>Você está logado como: <strong sec:authentication="name"></strong></p>
+
+<p>Suas permissões: <strong sec:authentication="authorities"></strong></p>
+
+<hr>
+
+<h2>O que você gostaria de fazer?</h2>
+
+<div sec:authorize="hasRole('CLIENTE')">
+    <h3>Área do Cliente</h3>
+    <p><a th:href="@{/cliente/cardapio}">Ver Cardápio e Fazer um Pedido</a></p>
+    <p><a th:href="@{/cliente/meus-pedidos}">Ver Meus Pedidos</a></p>
+</div>
+
+<div sec:authorize="hasAnyRole('GERENTE', 'CAIXA')">
+    <h3>Painel do Funcionário</h3>
+    <p><a th:href="@{/funcionario/pedidos}">Gerenciar Pedidos Atuais</a></p>
+</div>
+
+<div sec:authorize="hasRole('GERENTE')">
+    <h3>Painel de Administração</h3>
+    <p><a th:href="@{/admin/produtos/novo}">Cadastrar Novo Produto</a></p>
+    <p><a th:href="@{/admin/funcionarios/novo}">Cadastrar Novo Funcionário</a></p>
+</div>
+
+<hr>
+
+<form th:action="@{/logout}" method="post">
+    <button type="submit">Sair (Logout)</button>
+</form>
+</body>
+</html>

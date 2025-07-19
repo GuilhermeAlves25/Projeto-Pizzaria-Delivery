@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(titulo='Histórico de Pedidos', conteudo=~{::corpo})}">
+<body>
+<th:block th:fragment="corpo">
+  <main class="container mt-5">
+    <div class="d-flex align-items-center mb-4">
+      <a th:href="@{/funcionario/dashboard}" class="btn btn-outline-secondary me-3">&larr; Voltar ao Painel</a>
+      <h1 class="fw-light mb-0">Histórico de Pedidos</h1>
+    </div>
+    <hr class="mb-4">
+
+    <div th:if="${paginaDePedidos.empty}" class="alert alert-secondary">
+      Nenhum pedido no histórico.
+    </div>
+
+    <div th:if="${!paginaDePedidos.empty}">
+      <div th:each="pedido : ${paginaDePedidos.content}" class="card mb-4 shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center"
+             th:classappend="${pedido.statusPedido == 'CANCELADO' ? 'bg-danger text-white' : 'bg-success text-white'}">
+          <h5 class="mb-0">Pedido #<span th:text="${pedido.id}"></span></h5>
+          <span class="fw-bold" th:text="${pedido.statusPedido}"></span>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <p><strong>Cliente:</strong> <span th:text="${pedido.cliente.nome}"></span></p>
+              <p><strong>Data:</strong> <span th:text="${#temporals.format(pedido.dataHora, 'dd/MM/yyyy HH:mm')}"></span></p>
+              <p><strong>Endereço:</strong> <span th:text="${pedido.enderecoDeEntrega.rua} + ', ' + ${pedido.enderecoDeEntrega.numero}"></span></p>
+            </div>
+            <div class="col-md-6">
+              <p><strong>Itens:</strong></p>
+              <ul class="list-unstyled ms-2">
+                <li th:each="item : ${pedido.itens}" th:text="${item.quantidade} + 'x ' + ${item.produto.nome}"></li>
+              </ul>
+              <p class="mt-2"><strong>Pagamento:</strong> <span th:text="${pedido.pagamento}"></span></p>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer text-end">
+          <strong class="fs-5">Total: <span th:text="'R$ ' + ${#numbers.formatDecimal(pedido.valorTotal, 1, 'POINT', 2, 'COMMA')}"></span></strong>
+        </div>
+      </div>
+    </div>
+
+    <nav th:if="${paginaDePedidos.totalPages > 1}" class="mt-4">
+      <ul class="pagination justify-content-center">
+        <li class="page-item" th:classappend="${paginaDePedidos.first} ? 'disabled'"><a class="page-link" th:href="@{/funcionario/historico(page=${paginaDePedidos.number - 1})}">&laquo;</a></li>
+        <li class="page-item" th:each="i : ${#numbers.sequence(0, paginaDePedidos.totalPages - 1)}" th:classappend="${i == paginaDePedidos.number} ? 'active'"><a class="page-link" th:href="@{/funcionario/historico(page=${i})}" th:text="${i + 1}"></a></li>
+        <li class="page-item" th:classappend="${paginaDePedidos.last} ? 'disabled'"><a class="page-link" th:href="@{/funcionario/historico(page=${paginaDePedidos.number + 1})}">&raquo;</a></li>
+      </ul>
+    </nav>
+  </main>
+</th:block>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(titulo='Faturamento', conteudo=~{::corpo})}">
+<body>
+<th:block th:fragment="corpo">
+    <main class="container mt-5">
+        <div class="d-flex align-items-center mb-4">
+            <a th:href="@{/admin/dashboard}" class="btn btn-outline-secondary me-3">&larr; Voltar ao Painel</a>
+            <h1 class="fw-light mb-0">Faturamento por Período</h1>
+        </div>
+        <hr class="mb-4">
+
+        <div class="card card-body mb-4">
+            <form th:action="@{/admin/faturamento}" method="get" class="row g-3 align-items-end">
+                <div class="col-md-4"><label for="dataInicio" class="form-label">Data de Início:</label><input type="date" class="form-control" id="dataInicio" name="dataInicio" th:value="${dataInicio}"></div>
+                <div class="col-md-4"><label for="dataFim" class="form-label">Data Final:</label><input type="date" class="form-control" id="dataFim" name="dataFim" th:value="${dataFim}"></div>
+                <div class="col-md-4 d-grid"><button type="submit" class="btn btn-success">Filtrar</button></div>
+            </form>
+        </div>
+
+        <div th:if="${pedidosFaturamento}">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark"><tr><th>Pedido #</th><th>Data/Hora</th><th>Cliente</th><th>Pagamento</th><th>Valor Total</th></tr></thead>
+                    <tbody>
+                    <tr th:each="pedido : ${pedidosFaturamento.content}">
+                        <td th:text="${pedido.pedidoId}"></td>
+                        <td th:text="${#temporals.format(pedido.dataHora, 'dd/MM/yyyy HH:mm')}"></td>
+                        <td th:text="${pedido.clienteNome}"></td>
+                        <td th:text="${pedido.pagamento}"></td>
+                        <td th:text="'R$ ' + ${#numbers.formatDecimal(pedido.valorTotal, 1, 'POINT', 2, 'COMMA')}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <nav th:if="${pedidosFaturamento.totalPages > 1}">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${pedidosFaturamento.first} ? 'disabled'"><a class="page-link" th:href="@{/admin/faturamento(page=${pedidosFaturamento.number-1}, dataInicio=${dataInicio}, dataFim=${dataFim})}">&laquo;</a></li>
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, pedidosFaturamento.totalPages - 1)}" th:classappend="${i == pedidosFaturamento.number} ? 'active'"><a class="page-link" th:href="@{/admin/faturamento(page=${i}, dataInicio=${dataInicio}, dataFim=${dataFim})}" th:text="${i + 1}"></a></li>
+                    <li class="page-item" th:classappend="${pedidosFaturamento.last} ? 'disabled'"><a class="page-link" th:href="@{/admin/faturamento(page=${pedidosFaturamento.number+1}, dataInicio=${dataInicio}, dataFim=${dataFim})}">&raquo;</a></li>
+                </ul>
+            </nav>
+            <div class="text-end mt-3">
+                <h4 class="fw-bold">Faturamento Total do Período: <span class="text-success" th:text="'R$ ' + ${#numbers.formatDecimal(faturamentoTotal, 1, 'POINT', 2, 'COMMA')}"></span></h4>
+            </div>
+        </div>
+    </main>
+</th:block>
+</body>
+</html>

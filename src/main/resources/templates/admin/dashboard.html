@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(titulo='Painel de Administração', conteudo=~{::corpo})}">
+<body>
+<th:block th:fragment="corpo">
+    <main class="container mt-5">
+        <a th:href="@{/funcionario/dashboard}" class="btn btn-outline-secondary me-3">&larr; Voltar ao Painel de Gestão</a>
+        <h1 class="fw-light mb-4">Painel Administrativo</h1>
+        <div th:if="${mensagemSucesso}" class="alert alert-success" th:text="${mensagemSucesso}"></div>
+        <div th:if="${mensagemErro}" class="alert alert-danger" th:text="${mensagemErro}"></div>
+
+        <div class="d-flex align-items-start">
+            <div class="nav flex-column nav-pills me-3" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#v-pills-funcionarios" type="button">Funcionários</button>
+                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#v-pills-produtos" type="button">Produtos</button>
+                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#v-pills-clientes" type="button">Clientes</button>
+                <a class="nav-link" th:href="@{/admin/faturamento}">Faturamento</a>
+            </div>
+
+            <div class="tab-content flex-grow-1 card card-body" id="v-pills-tabContent">
+                <div class="tab-pane fade show active" id="v-pills-funcionarios" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5>Funcionários Cadastrados</h5>
+                        <a th:href="@{/admin/funcionarios/novo}" class="btn btn-primary btn-sm">Novo +</a>
+                    </div>
+                    <table class="table table-striped">
+                        <thead><tr><th>Nome</th><th>Cargo</th><th>Salário</th><th>Admissão</th></tr></thead>
+                        <tbody>
+                        <tr th:each="func : ${funcionarios}">
+                            <td th:text="${func.nome}"></td>
+                            <td th:text="${func.cargo}"></td>
+                            <td th:text="${func.salario} ? 'R$ ' + ${#numbers.formatDecimal(func.salario, 1, 'POINT', 2, 'COMMA')} : '-'"></td>
+                            <td th:text="${func.dataAdmissao} ? ${#temporals.format(func.dataAdmissao, 'dd/MM/yyyy')} : '-'"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="tab-pane fade" id="v-pills-produtos" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5>Produtos Cadastrados</h5>
+                        <a th:href="@{/admin/produtos/novo}" class="btn btn-primary btn-sm">Novo +</a>
+                    </div>
+                    <table class="table table-striped">
+                        <thead><tr><th>Nome</th><th>Tipo</th><th>Preço</th></tr></thead>
+                        <tbody>
+                        <tr th:each="prod : ${produtos}">
+                            <td th:text="${prod.nome}"></td>
+                            <td th:text="${prod.tipo}"></td>
+                            <td th:text="'R$ ' + ${#numbers.formatDecimal(prod.preco, 1, 'POINT', 2, 'COMMA')}"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="tab-pane fade" id="v-pills-clientes" role="tabpanel">
+                    <h5>Clientes Cadastrados</h5>
+
+                    <div th:if="${paginaDeClientes.empty}" class="alert alert-info mt-3">
+                        Nenhum cliente encontrado.
+                    </div>
+
+                    <table class="table table-striped table-hover" th:if="${!paginaDeClientes.empty}">
+                        <thead>
+                        <tr><th>Nome</th><th>Telefone</th><th>Endereço Principal</th><th>Ações</th></tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="cliente : ${paginaDeClientes.content}">
+                            <td th:text="${cliente.nome}"></td>
+                            <td th:text="${cliente.telefone}"></td>
+                            <td th:text="${!#lists.isEmpty(cliente.enderecos)} ? ${cliente.enderecos[0].rua} + ', ' + ${cliente.enderecos[0].numero} : 'N/A'"></td>
+                            <td>
+                                <a th:href="@{/admin/clientes/{id}/pedidos(id=${cliente.id})}" class="btn btn-sm btn-outline-primary">Ver Pedidos</a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+
+                    <nav th:if="${paginaDeClientes.totalPages > 1}">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item" th:classappend="${paginaDeClientes.first} ? 'disabled'">
+                                <a class="page-link" th:href="@{/admin/dashboard(clientePage=${paginaDeClientes.number - 1})}">&laquo;</a>
+                            </li>
+                            <li class="page-item" th:each="i : ${#numbers.sequence(0, paginaDeClientes.totalPages - 1)}" th:classappend="${i == paginaDeClientes.number} ? 'active'">
+                                <a class="page-link" th:href="@{/admin/dashboard(clientePage=${i})}" th:text="${i + 1}"></a>
+                            </li>
+                            <li class="page-item" th:classappend="${paginaDeClientes.last} ? 'disabled'">
+                                <a class="page-link" th:href="@{/admin/dashboard(clientePage=${paginaDeClientes.number + 1})}">&raquo;</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+
+
+            </div>
+        </div>
+    </main>
+</th:block>
+</body>
+</html>

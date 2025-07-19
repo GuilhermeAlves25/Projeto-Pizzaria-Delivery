@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(titulo='Painel de Gestão', conteudo=~{::corpo})}"
+      xmlns:sec="http://www.w3.org/1999/xhtml">
+<body>
+<th:block th:fragment="corpo">
+  <main class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1 class="fw-light">Painel de Gestão</h1>
+      <div>
+        <a th:href="@{/admin/dashboard}" class="btn btn-dark" sec:authorize="hasRole('GERENTE')">
+          <i class="bi bi-gear-fill"></i> Administração
+        </a>
+        <a th:href="@{/funcionario/historico}" class="btn btn-outline-secondary">Histórico de Pedidos</a>
+        <a th:href="@{/funcionario/dashboard}" class="btn btn-primary">
+          <i class="bi bi-arrow-clockwise"></i> Atualizar
+        </a>
+      </div>
+    </div>
+
+    <div th:if="${mensagemSucesso}" class="alert alert-success" th:text="${mensagemSucesso}"></div>
+    <div th:if="${mensagemErro}" class="alert alert-danger" th:text="${mensagemErro}"></div>
+
+    <h3 class="fw-normal">Acompanhamento de Pedidos</h3>
+    <hr>
+
+    <div th:if="${paginaDePedidos.empty}" class="alert alert-info">
+      Nenhum pedido para gerenciar no momento.
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+      <div th:each="pedido : ${paginaDePedidos.content}" class="col">
+        <div class="card shadow-sm h-100">
+          <div class="card-header d-flex justify-content-between">
+            <strong>Pedido #<span th:text="${pedido.id}"></span></strong>
+            <span class="badge"
+                  th:classappend="${pedido.statusPedido == 'RECEBIDO' ? 'bg-primary' :
+                                               pedido.statusPedido == 'PRONTO PARA ENTREGA' ? 'bg-warning text-dark' :
+                                               pedido.statusPedido == 'EM_ENTREGA' ? 'bg-info text-dark' :
+                                               pedido.statusPedido == 'ENTREGUE' ? 'bg-success' : 'bg-danger'}"
+                  th:text="${pedido.statusPedido}">
+                        </span>
+          </div>
+          <div class="card-body">
+            <p class="card-text mb-1"><strong>Cliente:</strong> <span th:text="${pedido.cliente.nome}"></span></p>
+            <p class="card-text mb-1"><strong>Endereço:</strong> <span th:text="${pedido.enderecoDeEntrega.rua} + ', ' + ${pedido.enderecoDeEntrega.numero}"></span></p>
+            <p class="card-text mb-1"><strong>Horário:</strong> <span th:text="${#temporals.format(pedido.dataHora, 'dd/MM HH:mm')}"></span></p>
+            <p class="card-text mb-1"><strong>Pagamento:</strong> <span th:text="${pedido.pagamento}"></span></p>
+            <p class="card-text mb-1"><strong>Total:</strong> <span class="fw-bold" th:text="'R$ ' + ${#numbers.formatDecimal(pedido.valorTotal, 1, 'POINT', 2, 'COMMA')}"></span></p>
+
+            <p class="card-text mb-1 mt-2"><strong>Itens:</strong></p>
+            <ul class="list-unstyled small ms-3">
+              <li th:each="item : ${pedido.itens}" th:text="${item.quantidade} + 'x ' + ${item.produto.nome}"></li>
+            </ul>
+          </div>
+          <div class="card-footer text-center">
+            <form th:if="${pedido.statusPedido == 'RECEBIDO'}" th:action="@{/funcionario/pedidos/preparar}" method="post">
+              <input type="hidden" name="pedidoId" th:value="${pedido.id}" />
+              <button type="submit" class="btn btn-success w-100">
+                <i class="bi bi-check-circle-fill me-2"></i>Pedido Pronto
+              </button>
+            </form>
+            <div th:unless="${pedido.statusPedido == 'RECEBIDO'}">
+              <small class="text-muted">Aguardando próximo status...</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <nav th:if="${paginaDePedidos.totalPages > 1}" class="mt-4">
+      <ul class="pagination justify-content-center">
+        <li class="page-item" th:classappend="${paginaDePedidos.first} ? 'disabled'">
+          <a class="page-link" th:href="@{/funcionario/dashboard(page=${paginaDePedidos.number - 1})}">&laquo;</a>
+        </li>
+        <li class="page-item" th:each="i : ${#numbers.sequence(0, paginaDePedidos.totalPages - 1)}" th:classappend="${i == paginaDePedidos.number} ? 'active'">
+          <a class="page-link" th:href="@{/funcionario/dashboard(page=${i})}" th:text="${i + 1}"></a>
+        </li>
+        <li class="page-item" th:classappend="${paginaDePedidos.last} ? 'disabled'">
+          <a class="page-link" th:href="@{/funcionario/dashboard(page=${paginaDePedidos.number + 1})}">&raquo;</a>
+        </li>
+      </ul>
+    </nav>
+  </main>
+</th:block>
+</body>
+</html>

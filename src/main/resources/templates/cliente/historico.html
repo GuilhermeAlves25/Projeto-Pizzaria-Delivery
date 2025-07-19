@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(titulo='Histórico de Pedidos', conteudo=~{::corpo})}">
+<body>
+<th:block th:fragment="corpo">
+  <main class="container mt-5">
+    <div class="d-flex align-items-center mb-4">
+      <a th:href="@{/cliente/cardapio}" class="btn btn-outline-secondary me-3">&larr; Voltar ao Cardápio</a>
+      <h1 class="fw-light mb-0">Histórico de Pedidos</h1>
+    </div>
+    <hr class="mb-4">
+
+    <div th:if="${paginaDePedidos.empty}" class="alert alert-info text-center">
+      Você ainda não possui pedidos finalizados ou cancelados no seu histórico.
+    </div>
+
+    <div th:if="${!paginaDePedidos.empty}">
+      <div th:each="pedido : ${paginaDePedidos.content}" class="card mb-4 shadow-sm">
+
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Pedido #<span th:text="${pedido.id}">43</span></h5>
+          <span class="badge"
+                th:classappend="${pedido.statusPedido == 'ENTREGUE' ? 'bg-success' : 'bg-danger'}"
+                th:text="${pedido.statusPedido}">ENTREGUE</span>
+        </div>
+
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6 mb-3 mb-md-0">
+              <p class="mb-1"><strong>Data do pedido:</strong></p>
+              <p th:text="${#temporals.format(pedido.dataHora, 'dd/MM/yyyy HH:mm')}"></p>
+
+              <p class="mb-1"><strong>Endereço de Entrega:</strong></p>
+              <p th:text="${pedido.enderecoDeEntrega.rua} + ', ' + ${pedido.enderecoDeEntrega.numero} + ' - ' + ${pedido.enderecoDeEntrega.bairro}"></p>
+            </div>
+            <div class="col-md-6">
+              <p class="mb-1"><strong>Itens:</strong></p>
+              <ul class="list-unstyled">
+                <li th:each="item : ${pedido.itens}" th:text="${item.quantidade} + 'x ' + ${item.produto.nome}"></li>
+              </ul>
+              <p class="mb-1"><strong>Pagamento:</strong> <span th:text="${pedido.pagamento}"></span></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-footer text-end">
+          <strong class="fs-5">Total: <span th:text="'R$ ' + ${#numbers.formatDecimal(pedido.valorTotal, 1, 'POINT', 2, 'COMMA')}"></span></strong>
+        </div>
+      </div>
+    </div>
+
+    <nav th:if="${paginaDePedidos.totalPages > 1}" aria-label="Paginação do Histórico" class="mt-4">
+      <ul class="pagination justify-content-center">
+        <li class="page-item" th:classappend="${paginaDePedidos.first} ? 'disabled'">
+          <a class="page-link" th:href="@{/cliente/historico(page=${paginaDePedidos.number - 1})}">&laquo;</a>
+        </li>
+        <li class="page-item" th:each="i : ${#numbers.sequence(0, paginaDePedidos.totalPages - 1)}" th:classappend="${i == paginaDePedidos.number} ? 'active'">
+          <a class="page-link" th:href="@{/cliente/historico(page=${i})}" th:text="${i + 1}"></a>
+        </li>
+        <li class="page-item" th:classappend="${paginaDePedidos.last} ? 'disabled'">
+          <a class="page-link" th:href="@{/cliente/historico(page=${paginaDePedidos.number + 1})}">&raquo;</a>
+        </li>
+      </ul>
+    </nav>
+  </main>
+</th:block>
+</body>
+</html>

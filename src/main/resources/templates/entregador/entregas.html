@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(titulo='Painel de Entregas', conteudo=~{::corpo})}">
+<body>
+<th:block th:fragment="corpo">
+    <main class="container mt-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="fw-light">Painel do Entregador</h1>
+            <a th:href="@{/entregador/entregas}" class="btn btn-primary">
+                <i class="bi bi-arrow-clockwise"></i> Atualizar
+            </a>
+        </div>
+
+        <h3 class="fw-normal">Entregas Disponíveis para Retirada</h3>
+        <hr>
+        <div th:if="${pedidosParaEntrega.empty}" class="alert alert-info">
+            Nenhum pedido pronto para entrega no momento.
+        </div>
+        <div class="row row-cols-1 row-cols-md-2 g-4">
+            <div th:each="pedido : ${pedidosParaEntrega.content}" class="col">
+                <div class="card shadow-sm">
+                    <div class="card-header d-flex justify-content-between">
+                        <strong>Pedido #<span th:text="${pedido.id}"></span></strong>
+                        <span class="badge bg-warning text-dark">PRONTO P/ ENTREGA</span>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text mb-1"><strong>Cliente:</strong> <span th:text="${pedido.cliente.nome}"></span></p>
+                        <p class="card-text mb-1"><strong>Endereço:</strong> <span th:text="${pedido.enderecoDeEntrega.rua} + ', ' + ${pedido.enderecoDeEntrega.numero}"></span></p>
+                        <p class="card-text mb-1"><strong>Itens:</strong></p>
+                        <ul class="list-unstyled small ms-3">
+                            <li th:each="item : ${pedido.itens}" th:text="${item.quantidade} + 'x ' + ${item.produto.nome}"></li>
+                        </ul>
+                    </div>
+                    <div class="card-footer text-center">
+                        <form th:action="@{/entregador/iniciar-entrega}" method="post">
+                            <input type="hidden" name="pedidoId" th:value="${pedido.id}" />
+                            <button type="submit" class="btn btn-success w-100">Realizar Entrega</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <nav th:if="${pedidosParaEntrega.totalPages > 1}" class="mt-4">
+            <ul class="pagination justify-content-center">
+                <li class="page-item" th:classappend="${pedidosParaEntrega.first} ? 'disabled'">
+                    <a class="page-link" th:href="@{/entregador/entregas(pageDisponiveis=${pedidosParaEntrega.number - 1}, pageMinhas=${minhasEntregas.number})}">&laquo;</a>
+                </li>
+                <li class="page-item" th:each="i : ${#numbers.sequence(0, pedidosParaEntrega.totalPages - 1)}" th:classappend="${i == pedidosParaEntrega.number} ? 'active'">
+                    <a class="page-link" th:href="@{/entregador/entregas(pageDisponiveis=${i}, pageMinhas=${minhasEntregas.number})}" th:text="${i + 1}"></a>
+                </li>
+                <li class="page-item" th:classappend="${pedidosParaEntrega.last} ? 'disabled'">
+                    <a class="page-link" th:href="@{/entregador/entregas(pageDisponiveis=${pedidosParaEntrega.number + 1}, pageMinhas=${minhasEntregas.number})}">&raquo;</a>
+                </li>
+            </ul>
+        </nav>
+
+        <h3 class="fw-normal mt-5">Minhas Entregas em Andamento</h3>
+        <hr>
+        <div th:if="${minhasEntregas.empty}" class="alert alert-secondary">
+            Você não possui nenhuma entrega em andamento.
+        </div>
+        <div class="row row-cols-1 row-cols-md-2 g-4">
+            <div th:each="pedido : ${minhasEntregas.content}" class="col">
+                <div class="card shadow-sm border-primary">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between">
+                        <strong>Pedido #<span th:text="${pedido.id}"></span></strong>
+                        <span class="badge bg-light text-primary">EM ENTREGA</span>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text mb-1"><strong>Cliente:</strong> <span th:text="${pedido.cliente.nome}"></span></p>
+                        <p class="card-text mb-1"><strong>Endereço:</strong> <span th:text="${pedido.enderecoDeEntrega.rua} + ', ' + ${pedido.enderecoDeEntrega.numero}"></span></p>
+                        <p class="card-text mb-1"><strong>Itens:</strong></p>
+                        <ul class="list-unstyled small ms-3">
+                            <li th:each="item : ${pedido.itens}" th:text="${item.quantidade} + 'x ' + ${item.produto.nome}"></li>
+                        </ul>
+                    </div>
+                    <div class="card-footer text-center">
+                        <form th:action="@{/entregador/concluir-entrega}" method="post">
+                            <input type="hidden" name="pedidoId" th:value="${pedido.id}" />
+                            <button type="submit" class="btn btn-primary w-100">Concluir Entrega</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <nav th:if="${minhasEntregas.totalPages > 1}" class="mt-4">
+            <ul class="pagination justify-content-center">
+                <li class="page-item" th:classappend="${minhasEntregas.first} ? 'disabled'">
+                    <a class="page-link" th:href="@{/entregador/entregas(pageDisponiveis=${pedidosParaEntrega.number}, pageMinhas=${minhasEntregas.number - 1})}">&laquo;</a>
+                </li>
+                <li class="page-item" th:each="i : ${#numbers.sequence(0, minhasEntregas.totalPages - 1)}" th:classappend="${i == minhasEntregas.number} ? 'active'">
+                    <a class="page-link" th:href="@{/entregador/entregas(pageDisponiveis=${pedidosParaEntrega.number}, pageMinhas=${i})}" th:text="${i + 1}"></a>
+                </li>
+                <li class="page-item" th:classappend="${minhasEntregas.last} ? 'disabled'">
+                    <a class="page-link" th:href="@{/entregador/entregas(pageDisponiveis=${pedidosParaEntrega.number}, pageMinhas=${minhasEntregas.number + 1})}">&raquo;</a>
+                </li>
+            </ul>
+        </nav>
+    </main>
+</th:block>
+</body>
+</html>
