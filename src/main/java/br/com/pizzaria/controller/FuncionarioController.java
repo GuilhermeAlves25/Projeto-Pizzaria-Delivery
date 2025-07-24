@@ -25,12 +25,7 @@ public class FuncionarioController {
     private PedidoService pedidoService;
 
 
-   // @GetMapping("/dashboard")
-   // public String verDashboard(Model model) {
-        // Busca todos os pedidos com status "RECEBIDO"
-        //model.addAttribute("pedidosRecebidos", pedidoService.buscarPedidosRecebidos());
-        //return "funcionario/dashboard"; // Retorna a nova página que vamos criar
-    //}
+
 
     @GetMapping("/dashboard")
     public String verDashboard(Model model, @RequestParam(name = "page", defaultValue = "0") int page) {
@@ -48,7 +43,7 @@ public class FuncionarioController {
     @PostMapping("/pedidos/preparar")
     public String prepararPedido(@RequestParam("pedidoId") Long pedidoId, RedirectAttributes redirectAttributes) {
         try {
-            // Reutilizamos o método que dispara a notificação do Observer!
+
             pedidoService.atualizarStatus(pedidoId, "PRONTO PARA ENTREGA");
             redirectAttributes.addFlashAttribute("mensagemSucesso", "Status do pedido #" + pedidoId + " atualizado para PRONTO PARA ENTREGA.");
         } catch (Exception e) {

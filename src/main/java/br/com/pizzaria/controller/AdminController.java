@@ -12,6 +12,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile; // Adicione este import
+import org.springframework.web.bind.annotation.RequestParam; // Adicione este import
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -73,9 +75,9 @@ public class AdminController {
         Page<Cliente> paginaDeClientes = clienteService.listarTodosPaginado(clientePageable);
         model.addAttribute("paginaDeClientes", paginaDeClientes);
 
-        // Mantém as outras listas como estavam (não paginadas)
+
         model.addAttribute("funcionarios", funcionarioService.listarTodos());
-        model.addAttribute("produtos", produtoService.listarTodos());
+        model.addAttribute("produtos", produtoService.listarTodosParaAdmin());
 
         return "admin/dashboard";
     }
@@ -106,12 +108,16 @@ public class AdminController {
     }
 
     @PostMapping("/produtos/salvar")
-    public String salvarProduto(@ModelAttribute Produto produto, RedirectAttributes redirectAttributes) {
+    public String salvarProduto(@ModelAttribute Produto produto,
+                                @RequestParam("imagemFile") MultipartFile imagemFile, // Recebe o arquivo
+                                RedirectAttributes redirectAttributes) {
         try {
-            cadastroService.cadastrarNovoProduto(produto);
+
+            cadastroService.cadastrarNovoProduto(produto, imagemFile);
             redirectAttributes.addFlashAttribute("mensagemSucesso", "Produto cadastrado!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("mensagemErro", "Erro ao cadastrar produto.");
+            e.printStackTrace();
         }
         return "redirect:/admin/dashboard";
     }
@@ -130,5 +136,43 @@ public class AdminController {
         model.addAttribute("cliente", cliente);
         model.addAttribute("paginaDePedidos", paginaDePedidos); // Agora enviamos o objeto de página
         return "admin/cliente-pedidos";
+    }
+
+
+    @GetMapping("/produtos/editar/{id}")
+    public String editarProdutoForm(@PathVariable("id") Long id, Model model) {
+        // Busca o produto pelo ID e envia para o formulário
+        Produto produto = produtoService.listarTodosParaAdmin().stream()
+                .filter(p -> p.getId().equals(id)).findFirst().orElse(null);
+
+        model.addAttribute("produto", produto);
+        return "admin/form-produto-editar"; // Reutilizamos o mesmo formulário
+    }
+
+
+    @PostMapping("/produtos/atualizar")
+    public String atualizarProduto(@ModelAttribute Produto produto,
+                                   @RequestParam("imagemFile") MultipartFile imagemFile,
+                                   RedirectAttributes redirectAttributes) {
+        try {
+            cadastroService.atualizarProduto(produto, imagemFile);
+            redirectAttributes.addFlashAttribute("mensagemSucesso", "Produto atualizado com sucesso!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("mensagemErro", "Erro ao atualizar o produto.");
+        }
+        return "redirect:/admin/dashboard";
+    }
+
+    @PostMapping("/produtos/alternar-status/{id}")
+    public String alternarStatusProduto(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
+        try {
+            // Chama o novo método do serviço
+            produtoService.alternarStatusProduto(id);
+            // Mensagem de sucesso genérica
+            redirectAttributes.addFlashAttribute("mensagemSucesso", "Status do produto alterado com sucesso!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("mensagemErro", "Erro ao alterar o status do produto.");
+        }
+        return "redirect:/admin/dashboard";
     }
 }

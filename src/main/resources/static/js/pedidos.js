@@ -1,6 +1,4 @@
-/**
- * Carrega a lista de pedidos recentes (status 'RECEBIDO') no dropdown de recentes.
- */
+
 function carregarPedidosRecentes(page = 0) {
     const dropdownBody = document.getElementById('pedidos-dropdown-body');
     fetch(`/cliente/meus-pedidos/recentes?page=${page}`)
@@ -11,7 +9,7 @@ function carregarPedidosRecentes(page = 0) {
 
 
 function verDetalhesPedido(pedidoId, origem) {
-    // Determina em qual dropdown os detalhes devem ser exibidos
+
     const targetDivId = origem === 'historico' ? 'historico-dropdown-body' : 'pedidos-dropdown-body';
     const dropdownBody = document.getElementById(targetDivId);
 
@@ -33,8 +31,8 @@ function mostrarDetalhesHistorico(pedidoId) {
     fetch(`/cliente/meus-pedidos/detalhe-fragmento/${pedidoId}`)
         .then(response => response.text())
         .then(html => {
-            container.innerHTML = html; // Injeta o fragmento no container
-            container.scrollIntoView({ behavior: 'smooth', block: 'center' }); // Rola a tela para o painel
+            container.innerHTML = html;
+            container.scrollIntoView({ behavior: 'smooth', block: 'center' });
         })
         .catch(error => console.error("Erro ao carregar detalhes:", error));
 }
@@ -43,6 +41,6 @@ function mostrarDetalhesHistorico(pedidoId) {
 function fecharDetalhesHistorico() {
     const container = document.getElementById('detalhes-pedido-container');
     if (container) {
-        container.innerHTML = ''; // Limpa o conteúdo
+        container.innerHTML = '';
     }
 }

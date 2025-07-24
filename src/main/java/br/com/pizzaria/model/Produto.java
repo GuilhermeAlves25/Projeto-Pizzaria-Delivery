@@ -9,8 +9,8 @@ import java.math.BigDecimal;
 
 @Getter
 @Setter
-@NoArgsConstructor // Construtor sem argumentos (exigido pelo JPA)
-@AllArgsConstructor // Construtor com todos os argumentos (útil para testes e DTOs)
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "produtos")
 public class Produto {
@@ -28,4 +28,5 @@ public class Produto {
     private String tipo;
     private String tamanho;
     private String caminhoImagem;
+    private boolean ativo = true;
 }

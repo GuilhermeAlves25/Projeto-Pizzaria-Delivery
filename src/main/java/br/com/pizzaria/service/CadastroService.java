@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 
 @Service
@@ -28,11 +29,13 @@ public class CadastroService {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private FuncionarioRepository funcionarioRepository; // Adicione este
+    private FuncionarioRepository funcionarioRepository;
     @Autowired
-    private ProdutoRepository produtoRepository; // Adicione este
+    private ProdutoRepository produtoRepository;
     @Autowired
     private ProdutoFactory produtoFactory;
+    @Autowired
+    private S3Service s3Service;
 
     @Transactional
     public void cadastrarNovoCliente(Cliente cliente) {
@@ -58,18 +61,49 @@ public class CadastroService {
         funcionarioRepository.save(funcionario);
     }
 
-    public void cadastrarNovoProduto(Produto dadosProduto) {
-        // AQUI ESTÁ O USO DO PADRÃO FACTORY METHOD:
-        // Não usamos "new Produto()". Pedimos para a fábrica criar o objeto.
+    public void cadastrarNovoProduto(Produto dadosProduto, MultipartFile imagem) {
+        String urlDaImagem = null;
+
+        // Se um arquivo de imagem foi enviado, faz o upload
+        if (imagem != null && !imagem.isEmpty()) {
+            urlDaImagem = s3Service.uploadFile(imagem);
+        }
+
         Produto novoProduto = produtoFactory.criarProduto(
                 dadosProduto.getNome(),
                 dadosProduto.getDescricao(),
                 dadosProduto.getPreco(),
                 dadosProduto.getTipo(),
                 dadosProduto.getTamanho(),
-                dadosProduto.getCaminhoImagem()
+                urlDaImagem // Usa a URL retornada pelo S3
         );
         produtoRepository.save(novoProduto);
     }
 
+
+    @Transactional
+    public void atualizarProduto(Produto dadosProduto, MultipartFile imagem) {
+        // Busca o produto original no banco de dados para garantir que ele existe
+        Produto produtoExistente = produtoRepository.findById(dadosProduto.getId())
+                .orElseThrow(() -> new RuntimeException("Produto não encontrado!"));
+
+        // Atualiza os dados do produto com as informações do formulário
+        produtoExistente.setNome(dadosProduto.getNome());
+        produtoExistente.setDescricao(dadosProduto.getDescricao());
+        produtoExistente.setPreco(dadosProduto.getPreco());
+        produtoExistente.setTipo(dadosProduto.getTipo().toUpperCase());
+        produtoExistente.setTamanho(dadosProduto.getTamanho().toUpperCase());
+
+        // Lógica para a imagem:
+        // Se um novo arquivo de imagem foi enviado (e não está vazio)...
+        if (imagem != null && !imagem.isEmpty()) {
+            // ...faz o upload da nova imagem para o S3...
+            String novaUrlDaImagem = s3Service.uploadFile(imagem);
+            // ...e atualiza o caminho da imagem no produto.
+            produtoExistente.setCaminhoImagem(novaUrlDaImagem);
+        }
+        // Se nenhuma imagem nova foi enviada, o caminho da imagem antiga é mantido.
+
+        produtoRepository.save(produtoExistente);
+    }
 }

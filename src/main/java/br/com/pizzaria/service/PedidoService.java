@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -89,11 +90,12 @@ public class PedidoService {
 
     public Page<Pedido> buscarHistoricoDeTodosPedidos(Pageable pageable) {
 
-        List<String> statusHistorico = List.of("ENTREGUE", "CANCELADO");
+        List<String> statusHistorico = List.of("ENTREGUE", "CANCELADO","RECEBIDO");
 
         return pedidoRepository.findAllByStatusPedidoIn(statusHistorico, pageable);
     }
 
+    @Transactional(readOnly = true)
     public Page<Pedido> buscarPedidosAtivosDoCliente(Cliente cliente, Pageable pageable) {
 
         List<String> statusAtivos = List.of("RECEBIDO", "EM PREPARO", "PRONTO PARA ENTREGA","SAIU PARA ENTREGA");

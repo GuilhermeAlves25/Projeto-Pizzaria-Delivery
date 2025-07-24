@@ -16,11 +16,10 @@ public class WebController {
     @Autowired
     private CadastroService cadastroService;
 
-    // ADICIONE ESTE MÉTODO
+
     @GetMapping("/login")
     public String exibirFormularioLogin() {
-        // Esta linha simplesmente diz ao Spring para renderizar e retornar
-        // o arquivo "login.html" que vamos criar.
+
         return "login";
     }
 

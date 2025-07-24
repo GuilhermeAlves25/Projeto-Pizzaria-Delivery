@@ -26,13 +26,13 @@ public class EntregadorController {
                               @RequestParam(name = "pageDisponiveis", defaultValue = "0") int pageDisponiveis,
                               @RequestParam(name = "pageMinhas", defaultValue = "0") int pageMinhas) {
 
-        int pageSize = 4; // 4 pedidos por página
+        int pageSize = 4;
 
-        // Busca a página de pedidos disponíveis
+
         model.addAttribute("pedidosParaEntrega",
                 pedidoService.buscarPedidosProntosParaEntrega(PageRequest.of(pageDisponiveis, pageSize)));
 
-        // Busca a página de entregas em andamento
+
         Funcionario entregadorLogado = (Funcionario) userDetails.getUsuario();
         model.addAttribute("minhasEntregas",
                 pedidoService.buscarEntregasEmAndamento(entregadorLogado, PageRequest.of(pageMinhas, pageSize)));

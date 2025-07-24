@@ -15,12 +15,12 @@ public class ClienteService {
     @Autowired
     private ClienteRepository clienteRepository;
 
-    // Método antigo para listar todos (pode ser mantido ou removido)
+
     public List<Cliente> listarTodos() {
         return clienteRepository.findAll();
     }
 
-    // NOVO MÉTODO: Busca todos os clientes de forma paginada.
+
     public Page<Cliente> listarTodosPaginado(Pageable pageable) {
         return clienteRepository.findAll(pageable);
     }

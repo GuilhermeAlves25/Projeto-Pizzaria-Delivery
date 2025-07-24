@@ -10,11 +10,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class EnderecoService {
 
-    @Autowired
-    private EnderecoRepository enderecoRepository;
+    private final EnderecoRepository enderecoRepository;
+
+    public EnderecoService(EnderecoRepository enderecoRepository) {
+        this.enderecoRepository = enderecoRepository;
+    }
 
     @Transactional
-
     public void salvarNovoEndereco(Endereco endereco, Usuario usuarioLogado) {
 
         endereco.setUsuario(usuarioLogado);

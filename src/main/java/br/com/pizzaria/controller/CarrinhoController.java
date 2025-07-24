@@ -32,7 +32,7 @@ public class CarrinhoController {
 
     @PostMapping("/adicionar/{produtoId}")
     public String adicionarAoCarrinho(@PathVariable("produtoId") Long produtoId, Model model) {
-        Produto produto = produtoService.listarTodos().stream()
+        Produto produto = produtoService.listarTodosAtivos().stream()
                 .filter(p -> p.getId().equals(produtoId))
                 .findFirst()
                 .orElseThrow(() -> new NoSuchElementException("Produto não encontrado com ID: " + produtoId));

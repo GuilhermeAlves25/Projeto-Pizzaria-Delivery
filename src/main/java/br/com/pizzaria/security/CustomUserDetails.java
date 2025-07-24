@@ -19,7 +19,7 @@ public class CustomUserDetails implements UserDetails {
         this.usuario = usuario;
     }
 
-    // Este método é a chave! Ele permite o acesso ao nosso objeto Usuario completo.
+
     public Usuario getUsuario() {
         return usuario;
     }

@@ -30,19 +30,17 @@ public class ClienteController {
 
     @GetMapping("/cardapio")
     public String verCardapio(Model model) {
-        model.addAttribute("produtos", produtoService.listarTodos());
+        model.addAttribute("produtos", produtoService.listarTodosAtivos());
         return "cliente/cardapio";
     }
 
-    /**
-     * NOVO: Retorna o fragmento da lista de pedidos recentes paginada.
-     */
+
     @GetMapping("/meus-pedidos/recentes")
     public String getPedidosRecentes(Model model,
                                      @AuthenticationPrincipal CustomUserDetails userDetails,
                                      @RequestParam(defaultValue = "0") int page) {
 
-        Page<Pedido> paginaDePedidos = pedidoService.buscarPedidosAtivosDoCliente( // <-- Mude de buscarPedidosRecebidosDoCliente para este
+        Page<Pedido> paginaDePedidos = pedidoService.buscarPedidosAtivosDoCliente(
                 (Cliente) userDetails.getUsuario(),
                 PageRequest.of(page, 3)
         );
@@ -50,9 +48,7 @@ public class ClienteController {
         return "fragments/pedidos :: lista-pedidos";
     }
 
-    /**
-     * NOVO: Retorna o fragmento com os detalhes de um único pedido.
-     */
+
     @GetMapping("/meus-pedidos/{id}")
     public String getDetalhesPedido(@PathVariable("id") Long pedidoId, Model model) {
         model.addAttribute("pedido", pedidoService.buscarPorId(pedidoId));
@@ -64,7 +60,7 @@ public class ClienteController {
                                         @AuthenticationPrincipal CustomUserDetails userDetails,
                                         @RequestParam(name = "page", defaultValue = "0") int page) {
 
-         // 5 pedidos por página no histórico
+
         Page<Pedido> paginaDePedidos = pedidoService.buscarHistoricoDoCliente(
                 (Cliente) userDetails.getUsuario(),PageRequest.of(page, 5)
         );
@@ -72,7 +68,7 @@ public class ClienteController {
 
         model.addAttribute("paginaDePedidos", paginaDePedidos);
 
-        // Retorna o nome do NOVO arquivo HTML que vamos criar
+
         return "cliente/historico";
     }
 

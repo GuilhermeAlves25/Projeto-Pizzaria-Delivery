@@ -47,7 +47,7 @@ public class PedidoController {
     }
 
     @PostMapping("/finalizar")
-    // AQUI ESTÁ A CORREÇÃO: Adicionamos o @AuthenticationPrincipal para que o Spring injete o usuário.
+
     public String finalizarPedido(@RequestParam("idEndereco") Long idEndereco,
                                   @RequestParam("formaPagamento") String formaPagamento,
                                   @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -58,7 +58,7 @@ public class PedidoController {
             return "redirect:/cliente/cardapio";
         }
         try {
-            // Agora a variável 'userDetails' existe e pode ser passada para o serviço.
+
             pedidoService.criarPedido(carrinhoService, idEndereco, formaPagamento, userDetails);
             redirectAttributes.addFlashAttribute("mensagemSucesso", "Pedido recebido com sucesso!");
             return "redirect:/cliente/cardapio";
@@ -72,27 +72,27 @@ public class PedidoController {
     @PostMapping("/cancelar")
     public String cancelarPedido(@RequestParam("pedidoId") Long pedidoId,
                                  @AuthenticationPrincipal CustomUserDetails userDetails,
-                                 RedirectAttributes redirectAttributes) { // Adicionamos RedirectAttributes
+                                 RedirectAttributes redirectAttributes) {
 
         Cliente cliente = (Cliente) userDetails.getUsuario();
         try {
             pedidoService.cancelarPedido(pedidoId, cliente);
-            // Se tudo der certo, mostra uma mensagem de sucesso
+
             redirectAttributes.addFlashAttribute("mensagemSucesso", "Pedido #" + pedidoId + " cancelado com sucesso!");
         } catch (Exception e) {
-            // Se o serviço lançar uma exceção, captura a mensagem e mostra como erro
+
             redirectAttributes.addFlashAttribute("mensagemErro", e.getMessage());
         }
 
-        // Redireciona de volta para a página de onde o usuário veio (ou para a home/cardápio)
+
         return "redirect:/cliente/cardapio";
     }
 
     @GetMapping("/test/update/{pedidoId}/{status}")
-    @ResponseBody // Retorna apenas texto, não uma página HTML
+    @ResponseBody
     public String testUpdateStatus(@PathVariable Long pedidoId, @PathVariable String status) {
 
-        // Esta chamada irá acionar toda a lógica do padrão Observer
+
         pedidoService.atualizarStatus(pedidoId, status);
 
         return "Evento de atualização para o pedido #" + pedidoId + " com o status '" + status + "' foi disparado!";
@@ -106,7 +106,7 @@ public class PedidoController {
 
         Page<Pedido> paginaDePedidos = pedidoService.buscarPedidosAtivosDoCliente(
                 (Cliente) userDetails.getUsuario(),
-                PageRequest.of(page, 3) // 3 pedidos por página
+                PageRequest.of(page, 3)
         );
         model.addAttribute("paginaDePedidos", paginaDePedidos);
         return "fragments/pedidos :: lista-pedidos";

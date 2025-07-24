@@ -18,7 +18,7 @@ public class Endereco {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // O relacionamento volta a apontar para a classe base Usuario
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_usuario", nullable = false)
     private Usuario usuario;

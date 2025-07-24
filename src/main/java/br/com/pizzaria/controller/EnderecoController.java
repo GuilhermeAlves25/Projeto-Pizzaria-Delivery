@@ -21,16 +21,15 @@ import java.util.List;
 @RequestMapping("/endereco")
 public class EnderecoController {
 
-    @Autowired
-    private EnderecoService enderecoService;
+    private final EnderecoService enderecoService;
+    private final CarrinhoService carrinhoService;
+    private final PedidoService pedidoService;
 
-    // Precisamos injetar estes serviços para poder montar a tela de checkout
-    @Autowired
-    private CarrinhoService carrinhoService;
-
-    @Autowired
-    private PedidoService pedidoService;
-
+    public EnderecoController(EnderecoService enderecoService, CarrinhoService carrinhoService, PedidoService pedidoService) {
+        this.enderecoService = enderecoService;
+        this.carrinhoService = carrinhoService;
+        this.pedidoService = pedidoService;
+    }
 
     @GetMapping("/novo")
     public String novoEnderecoForm(Model model) {
@@ -43,13 +42,13 @@ public class EnderecoController {
                                      @AuthenticationPrincipal CustomUserDetails userDetails,
                                      Model model) {
 
-        // 1. Salva o novo endereço no banco de dados
+
         enderecoService.salvarNovoEndereco(endereco, userDetails.getUsuario());
 
-        // 2. Prepara o modelo para renderizar novamente a tela de checkout ATUALIZADA
+
         Cliente cliente = (Cliente) userDetails.getUsuario();
         List<Endereco> enderecos = cliente.getEnderecos();
-        // A linha abaixo garante que a lista de endereços no objeto de sessão seja atualizada
+
         if (!enderecos.contains(endereco)) {
             enderecos.add(endereco);
         }
@@ -58,7 +57,7 @@ public class EnderecoController {
         model.addAttribute("carrinho", carrinhoService);
         model.addAttribute("TAXA_ENTREGA", PedidoService.TAXA_ENTREGA);
 
-        // 3. Retorna o fragmento HTML da tela de checkout para o JavaScript
+
         return "fragments/carrinho :: view-checkout";
     }
 }
