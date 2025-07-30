@@ -3,7 +3,6 @@ package br.com.pizzaria.controller;
 import br.com.pizzaria.model.Produto;
 import br.com.pizzaria.service.CarrinhoService;
 import br.com.pizzaria.service.ProdutoService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -14,11 +13,14 @@ import java.util.NoSuchElementException;
 @RequestMapping("/carrinho")
 public class CarrinhoController {
 
-    @Autowired
-    private CarrinhoService carrinhoService;
 
-    @Autowired
-    private ProdutoService produtoService;
+    private final CarrinhoService carrinhoService;
+    private final ProdutoService produtoService;
+
+    public CarrinhoController(CarrinhoService carrinhoService, ProdutoService produtoService) {
+        this.carrinhoService = carrinhoService;
+        this.produtoService = produtoService;
+    }
 
     private String retornarViewDoCarrinho(Model model) {
         model.addAttribute("carrinho", carrinhoService);

@@ -26,18 +26,15 @@ public class S3Service {
         try {
             String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
 
-            // Prepara a requisição de upload
+
             PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                     .bucket(bucketName)
                     .key(fileName)
-                    // A LINHA .acl("public-read") FOI REMOVIDA DAQUI
                     .contentType(file.getContentType())
                     .build();
 
-            // Envia o arquivo
             s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
 
-            // Retorna a URL pública do arquivo
             return s3Client.utilities().getUrl(builder -> builder.bucket(bucketName).key(fileName)).toExternalForm();
 
         } catch (IOException e) {

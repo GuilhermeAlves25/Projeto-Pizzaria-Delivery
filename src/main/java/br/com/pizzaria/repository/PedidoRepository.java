@@ -25,7 +25,11 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
     Page<Pedido> findByClienteIdAndStatusPedidoInOrderByDataHoraDesc(Long clienteId, List<String> statuses, Pageable pageable);
     Page<Pedido> findByClienteIdOrderByDataHoraDesc(Long clienteId, Pageable pageable);
     List<Pedido> findByStatusPedidoOrderByDataHoraAsc(String status);
+
     Page<Pedido> findByEntregadorIdAndStatusPedido(Long entregadorId, String status, Pageable pageable);
+
+    Page<Pedido> findByStatusPedidoAndDataHoraBetween(String status, LocalDateTime dataInicio, LocalDateTime dataFim, Pageable pageable);
+
 
     List<Pedido> findAllByStatusPedidoOrderByDataHoraAsc(String status);
 

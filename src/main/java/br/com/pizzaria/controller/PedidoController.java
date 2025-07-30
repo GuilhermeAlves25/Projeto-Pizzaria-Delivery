@@ -6,7 +6,6 @@ import br.com.pizzaria.model.Pedido;
 import br.com.pizzaria.security.CustomUserDetails;
 import br.com.pizzaria.service.CarrinhoService;
 import br.com.pizzaria.service.PedidoService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -22,10 +21,14 @@ import java.util.List;
 @RequestMapping("/pedido")
 public class PedidoController {
 
-    @Autowired
-    private PedidoService pedidoService;
-    @Autowired
-    private CarrinhoService carrinhoService;
+
+    private final PedidoService pedidoService;
+    private final CarrinhoService carrinhoService;
+
+    public PedidoController(PedidoService pedidoService, CarrinhoService carrinhoService) {
+        this.pedidoService = pedidoService;
+        this.carrinhoService = carrinhoService;
+    }
 
     @GetMapping("/checkout")
     public String checkoutView(Model model) {

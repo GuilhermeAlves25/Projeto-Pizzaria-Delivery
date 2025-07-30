@@ -3,7 +3,6 @@ package br.com.pizzaria.controller;
 import br.com.pizzaria.model.Funcionario;
 import br.com.pizzaria.security.CustomUserDetails;
 import br.com.pizzaria.service.PedidoService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -17,9 +16,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequestMapping("/entregador")
 public class EntregadorController {
 
-    @Autowired
-    private PedidoService pedidoService;
 
+    private final PedidoService pedidoService;
+
+    public EntregadorController(PedidoService pedidoService) {
+        this.pedidoService = pedidoService;
+    }
 
     @GetMapping("/entregas")
     public String verEntregas(Model model, @AuthenticationPrincipal CustomUserDetails userDetails,

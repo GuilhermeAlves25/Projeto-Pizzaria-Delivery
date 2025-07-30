@@ -6,7 +6,6 @@ import br.com.pizzaria.security.CustomUserDetails;
 import br.com.pizzaria.service.CarrinhoService;
 import br.com.pizzaria.service.EnderecoService;
 import br.com.pizzaria.service.PedidoService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

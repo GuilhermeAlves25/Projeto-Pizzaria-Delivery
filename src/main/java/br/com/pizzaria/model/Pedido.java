@@ -50,7 +50,8 @@ public class Pedido implements Subject {
     private String tipoEntrega;
 
 
-    @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL,
+            orphanRemoval = true, fetch = FetchType.EAGER)
     private List<ItemPedido> itens;
 
 

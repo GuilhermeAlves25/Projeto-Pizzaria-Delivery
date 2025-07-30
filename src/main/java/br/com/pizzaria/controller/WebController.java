@@ -2,7 +2,6 @@ package br.com.pizzaria.controller;
 
 import br.com.pizzaria.model.Cliente;
 import br.com.pizzaria.service.CadastroService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,9 +12,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 public class WebController {
 
-    @Autowired
-    private CadastroService cadastroService;
 
+    private final CadastroService cadastroService;
+
+    public WebController(CadastroService cadastroService) {
+        this.cadastroService = cadastroService;
+    }
 
     @GetMapping("/login")
     public String exibirFormularioLogin() {

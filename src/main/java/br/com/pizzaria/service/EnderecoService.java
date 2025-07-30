@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 public class EnderecoService {
 
     private final EnderecoRepository enderecoRepository;
@@ -16,7 +17,7 @@ public class EnderecoService {
         this.enderecoRepository = enderecoRepository;
     }
 
-    @Transactional
+
     public void salvarNovoEndereco(Endereco endereco, Usuario usuarioLogado) {
 
         endereco.setUsuario(usuarioLogado);

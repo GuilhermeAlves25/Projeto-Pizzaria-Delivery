@@ -3,7 +3,6 @@ package br.com.pizzaria.service;
 import br.com.pizzaria.model.Usuario;
 import br.com.pizzaria.repository.UsuarioRepository;
 import br.com.pizzaria.security.CustomUserDetails;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -12,8 +11,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
+
+    private final UsuarioRepository usuarioRepository;
+
+    public UserDetailsServiceImpl(UsuarioRepository usuarioRepository) {
+        this.usuarioRepository = usuarioRepository;
+    }
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {

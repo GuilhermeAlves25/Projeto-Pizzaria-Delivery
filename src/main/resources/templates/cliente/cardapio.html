@@ -11,7 +11,7 @@
         <div th:if="${mensagemErro}" class="alert alert-danger alert-dismissible fade show" role="alert">
             <strong th:text="${mensagemErro}"></strong> <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-        <h2 class="fw-light mb-5">Pizzas Salgadas</h2>
+        <h2 class="fw-light mb-5">Produtos</h2>
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
             <div class="col" th:each="produto : ${produtos}">
                 <div class="card h-100 shadow-sm" style="border-radius: 0.5rem; border: 1px solid #eee;">

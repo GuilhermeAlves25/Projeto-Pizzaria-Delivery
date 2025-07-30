@@ -5,28 +5,32 @@ import br.com.pizzaria.observer.SseNotificationObserver;
 import br.com.pizzaria.repository.PedidoCompletoViewRepository;
 import br.com.pizzaria.repository.PedidoRepository;
 import br.com.pizzaria.security.CustomUserDetails;
-import org.springframework.beans.factory.annotation.Autowired;
+
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class PedidoService {
 
-    @Autowired
-    private PedidoRepository pedidoRepository;
-    @Autowired
-    private PedidoCompletoViewRepository pedidoCompletoViewRepository;
 
+    private final PedidoRepository pedidoRepository;
+    private final PedidoCompletoViewRepository pedidoCompletoViewRepository;
     public static final BigDecimal TAXA_ENTREGA = new BigDecimal("5.00");
+
+    public PedidoService(PedidoRepository pedidoRepository, PedidoCompletoViewRepository pedidoCompletoViewRepository) {
+        this.pedidoRepository = pedidoRepository;
+        this.pedidoCompletoViewRepository = pedidoCompletoViewRepository;
+    }
 
     @Transactional
 
@@ -79,21 +83,13 @@ public class PedidoService {
         return novoPedido;
     }
 
-  //  public List<Pedido> buscarPedidosRecebidos() {
-       // return pedidoRepository.findAllByStatusPedidoOrderByDataHoraAsc("RECEBIDO");
-    //}
 
     public Page<Pedido> buscarTodosPedidosPaginado(Pageable pageable) {
 
         return pedidoRepository.findAll(pageable);
     }
 
-    public Page<Pedido> buscarHistoricoDeTodosPedidos(Pageable pageable) {
 
-        List<String> statusHistorico = List.of("ENTREGUE", "CANCELADO","RECEBIDO");
-
-        return pedidoRepository.findAllByStatusPedidoIn(statusHistorico, pageable);
-    }
 
     @Transactional(readOnly = true)
     public Page<Pedido> buscarPedidosAtivosDoCliente(Cliente cliente, Pageable pageable) {
@@ -132,15 +128,15 @@ public class PedidoService {
     }
 
     public Page<Pedido> buscarHistoricoDoCliente(Cliente cliente, Pageable pageable) {
-        // Define a lista de status que consideramos como histórico
         List<String> statusFinalizados = List.of("ENTREGUE", "CANCELADO");
-        // Chama o método do repositório para buscar os pedidos
         return pedidoRepository.findByClienteIdAndStatusPedidoInOrderByDataHoraDesc(cliente.getId(), statusFinalizados, pageable);
     }
 
     public Page<Pedido> buscarHistoricoCompletoDoCliente(Cliente cliente, Pageable pageable) {
         return pedidoRepository.findByClienteIdOrderByDataHoraDesc(cliente.getId(), pageable);
     }
+
+
 
     @Transactional
     public void atualizarStatus(Long pedidoId, String novoStatus) {
@@ -156,10 +152,9 @@ public class PedidoService {
         pedidoRepository.save(pedido);
     }
 
-    //public List<Pedido> buscarPedidosProntosParaEntrega() {
 
-        //return pedidoRepository.findByStatusPedidoComDetalhesCompletos("PRONTO PARA ENTREGA");
-    //}
+
+
         public Page<Pedido> buscarPedidosProntosParaEntrega(Pageable pageable) {
             return pedidoRepository.findByStatusPedidoComDetalhesCompletos("PRONTO PARA ENTREGA", pageable);
         }
@@ -172,20 +167,19 @@ public class PedidoService {
         if (entregador.getCargo() != Cargo.ENTREGADOR) {
             throw new SecurityException("Apenas entregadores podem iniciar uma entrega.");
         }
-
         pedidoRepository.atribuirEntregadorProcedure(pedidoId, entregador.getId());
-
         Pedido pedidoAtualizado = pedidoRepository.findById(pedidoId)
                 .orElseThrow(() -> new RuntimeException("Pedido não encontrado após atualização."));
 
         new SseNotificationObserver().atualizar(pedidoAtualizado);
-
-
     }
 
-    public Page<PedidoCompletoView> buscarPedidosPorPeriodoView(LocalDateTime dataInicio, LocalDateTime dataFim, Pageable pageable) {
+    public Page<PedidoCompletoView> buscarPedidosPorPeriodoView(LocalDateTime dataInicio,
+                                                                LocalDateTime dataFim,
+                                                                Pageable pageable) {
 
-        return pedidoCompletoViewRepository.findByDataHoraBetweenAndStatusPedido(dataInicio, dataFim, "ENTREGUE", pageable);
+        return pedidoCompletoViewRepository.findByDataHoraBetweenAndStatusPedido(dataInicio,
+                dataFim, "ENTREGUE", pageable);
     }
 
     public BigDecimal calcularFaturamentoPorPeriodo(LocalDateTime dataInicio, LocalDateTime dataFim) {
@@ -194,7 +188,14 @@ public class PedidoService {
         return total != null ? total : BigDecimal.ZERO;
     }
 
+    public Page<Pedido> buscarPedidosPorStatus(List<String> statuses, Pageable pageable) {
+        return pedidoRepository.findAllByStatusPedidoIn(statuses, pageable);
+    }
 
+    public Page<Pedido> buscarHistoricoDeTodosPedidos(Pageable pageable) {
+        List<String> statusHistorico = List.of("ENTREGUE", "CANCELADO");
+        return pedidoRepository.findAllByStatusPedidoIn(statusHistorico, pageable);
+    }
 
     public Page<Pedido> buscarEntregasEmAndamento(Funcionario entregador, Pageable pageable) {
         return pedidoRepository.findByEntregadorIdAndStatusPedido(entregador.getId(), "SAIU PARA ENTREGA", pageable);

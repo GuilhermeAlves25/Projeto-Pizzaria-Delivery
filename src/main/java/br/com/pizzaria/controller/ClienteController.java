@@ -5,7 +5,6 @@ import br.com.pizzaria.model.Pedido;
 import br.com.pizzaria.security.CustomUserDetails;
 import br.com.pizzaria.service.PedidoService;
 import br.com.pizzaria.service.ProdutoService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -16,17 +15,20 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.awt.print.Pageable;
+
 
 @Controller
 @RequestMapping("/cliente")
 public class ClienteController {
 
-    @Autowired
-    private ProdutoService produtoService;
 
-    @Autowired
-    private PedidoService pedidoService;
+    private final ProdutoService produtoService;
+    private final PedidoService pedidoService;
+
+    public ClienteController(ProdutoService produtoService, PedidoService pedidoService) {
+        this.produtoService = produtoService;
+        this.pedidoService = pedidoService;
+    }
 
     @GetMapping("/cardapio")
     public String verCardapio(Model model) {

@@ -2,7 +2,6 @@ package br.com.pizzaria.controller;
 
 import br.com.pizzaria.model.*;
 import br.com.pizzaria.service.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -12,8 +11,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.data.domain.Pageable;
-import org.springframework.web.multipart.MultipartFile; // Adicione este import
-import org.springframework.web.bind.annotation.RequestParam; // Adicione este import
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -25,19 +24,20 @@ import java.time.LocalTime;
 @RequestMapping("/admin")
 public class AdminController {
 
-    @Autowired
-    private CadastroService cadastroService;
-    @Autowired
-    private FuncionarioService funcionarioService;
-    @Autowired
-    private ProdutoService produtoService;
-    @Autowired
-    private ClienteService clienteService;
-    @Autowired
-    private PedidoService pedidoService;
 
+    private final CadastroService cadastroService;
+    private final FuncionarioService funcionarioService;
+    private final ProdutoService produtoService;
+    private final ClienteService clienteService;
+    private final PedidoService pedidoService;
 
-
+    public AdminController(CadastroService cadastroService, FuncionarioService funcionarioService, ProdutoService produtoService, ClienteService clienteService, PedidoService pedidoService) {
+        this.cadastroService = cadastroService;
+        this.funcionarioService = funcionarioService;
+        this.produtoService = produtoService;
+        this.clienteService = clienteService;
+        this.pedidoService = pedidoService;
+    }
 
     @GetMapping("/faturamento")
     public String faturamento(Model model,
@@ -45,11 +45,11 @@ public class AdminController {
                               @RequestParam(name = "dataInicio", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataInicio,
                               @RequestParam(name = "dataFim", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFim) {
 
-        // Só executa a busca se as datas foram fornecidas
+
         if (dataInicio != null && dataFim != null) {
             Pageable pageable = PageRequest.of(page, 10, Sort.by("dataHora").descending());
 
-            // Converte LocalDate para LocalDateTime para a busca no banco
+
             LocalDateTime inicio = dataInicio.atStartOfDay();
             LocalDateTime fim = dataFim.atTime(LocalTime.MAX);
 
@@ -58,26 +58,32 @@ public class AdminController {
 
             model.addAttribute("pedidosFaturamento", pedidosFaturamento);
             model.addAttribute("faturamentoTotal", faturamentoTotal);
-            // Devolve as datas para manter os campos do formulário preenchidos
             model.addAttribute("dataInicio", dataInicio);
             model.addAttribute("dataFim", dataFim);
         }
 
-        return "admin/faturamento"; // Retorna a nova página de faturamento
+        return "admin/faturamento";
     }
 
     @GetMapping("/dashboard")
     public String adminDashboard(Model model,
+                                 @RequestParam(name = "funcPage", defaultValue = "0") int funcPage,
+                                 @RequestParam(name = "prodPage", defaultValue = "0") int prodPage,
                                  @RequestParam(name = "clientePage", defaultValue = "0") int clientePage) {
 
-        // Paginação para os clientes: 10 por página, ordenado por nome
-        Pageable clientePageable = PageRequest.of(clientePage, 10, Sort.by("nome"));
-        Page<Cliente> paginaDeClientes = clienteService.listarTodosPaginado(clientePageable);
-        model.addAttribute("paginaDeClientes", paginaDeClientes);
+        int pageSize = 10;
 
+        // Paginação para Funcionários
+        Pageable funcionarioPageable = PageRequest.of(funcPage, pageSize, Sort.by("nome"));
+        model.addAttribute("paginaDeFuncionarios", funcionarioService.listarTodosPaginado(funcionarioPageable));
 
-        model.addAttribute("funcionarios", funcionarioService.listarTodos());
-        model.addAttribute("produtos", produtoService.listarTodosParaAdmin());
+        // Paginação para Produtos
+        Pageable produtoPageable = PageRequest.of(prodPage, pageSize, Sort.by("nome"));
+        model.addAttribute("paginaDeProdutos", produtoService.listarTodosParaAdminPaginado(produtoPageable));
+
+        // Paginação para Clientes
+        Pageable clientePageable = PageRequest.of(clientePage, pageSize, Sort.by("nome"));
+        model.addAttribute("paginaDeClientes", clienteService.listarTodosPaginado(clientePageable));
 
         return "admin/dashboard";
     }
@@ -128,25 +134,24 @@ public class AdminController {
                                       Model model) {
 
         Cliente cliente = clienteService.buscarPorId(clienteId);
-        // Define que queremos 10 pedidos por página
         Pageable pageable = PageRequest.of(page, 10);
 
         Page<Pedido> paginaDePedidos = pedidoService.buscarHistoricoCompletoDoCliente(cliente, pageable);
 
         model.addAttribute("cliente", cliente);
-        model.addAttribute("paginaDePedidos", paginaDePedidos); // Agora enviamos o objeto de página
+        model.addAttribute("paginaDePedidos", paginaDePedidos);
         return "admin/cliente-pedidos";
     }
 
 
     @GetMapping("/produtos/editar/{id}")
     public String editarProdutoForm(@PathVariable("id") Long id, Model model) {
-        // Busca o produto pelo ID e envia para o formulário
+
         Produto produto = produtoService.listarTodosParaAdmin().stream()
                 .filter(p -> p.getId().equals(id)).findFirst().orElse(null);
 
         model.addAttribute("produto", produto);
-        return "admin/form-produto-editar"; // Reutilizamos o mesmo formulário
+        return "admin/form-produto-editar";
     }
 
 
@@ -166,9 +171,9 @@ public class AdminController {
     @PostMapping("/produtos/alternar-status/{id}")
     public String alternarStatusProduto(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
         try {
-            // Chama o novo método do serviço
+
             produtoService.alternarStatusProduto(id);
-            // Mensagem de sucesso genérica
+
             redirectAttributes.addFlashAttribute("mensagemSucesso", "Status do produto alterado com sucesso!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("mensagemErro", "Erro ao alterar o status do produto.");
